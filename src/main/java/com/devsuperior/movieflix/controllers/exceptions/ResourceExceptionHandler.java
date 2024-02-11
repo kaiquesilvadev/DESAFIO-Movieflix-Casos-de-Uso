@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.devsuperior.movieflix.dto.StandardErrorDTO;
 import com.devsuperior.movieflix.dto.ValidationErrorDTO;
 import com.devsuperior.movieflix.services.exceptions.DatabaseException;
+import com.devsuperior.movieflix.services.exceptions.EntidadeNaoEncontradaException;
 import com.devsuperior.movieflix.services.exceptions.ResourceNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,6 +57,20 @@ public class ResourceExceptionHandler {
 		for (FieldError f : e.getBindingResult().getFieldErrors()) {
 			err.addError(f.getField(), f.getDefaultMessage());
 		}
+		
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	
+	@ExceptionHandler(EntidadeNaoEncontradaException.class)
+	public ResponseEntity<ValidationErrorDTO> EntidadeNaoEncontradaException(EntidadeNaoEncontradaException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.NOT_FOUND;
+		ValidationErrorDTO err = new ValidationErrorDTO();
+		err.setTimestamp(Instant.now());
+		err.setStatus(status.value());
+		err.setError("entidade não encontrada");
+		err.setMessage(e.getMessage());
+		err.setPath(request.getRequestURI());
 		
 		return ResponseEntity.status(status).body(err);
 	}
